@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="sk">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Profesionálny Nemecký Životopis + Bewerbung</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+        /* Základné nastavenia */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e2e8f0; margin: 0; padding: 0; }
+        
+        /* Kontajner pre Zoom */
+        #preview-scaler {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            overflow: hidden; /* Dôležité pre mobil */
+        }
+
+        /* A4 Papier - PEVNÁ ŠÍRKA */
+        .a4-page {
+            width: 210mm;  /* Pevná šírka A4 */
+            min-height: 297mm; /* Pevná výška A4 */
+            height: auto;
+            background: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            flex-shrink: 0; /* Nesmie sa zmenšovať flexboxom */
+            transform-origin: top center; /* Zoomuje sa od stredu hore */
+        }
+
+        /* CV Layout */
+        .cv-sidebar {
+            background-color: #334155;
+            color: white;
+            width: 70mm; /* Pevná šírka stĺpca */
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            padding: 25px;
+            box-sizing: border-box;
+        }
+
+        .cv-main {
+            margin-left: 70mm; /* Odsadenie presne o šírku stĺpca */
+            width: 140mm; /* Zvyšok šírky A4 */
+            padding: 35px;
+            box-sizing: border-box;
+        }
+
+        /* Foto */
+        .photo-container {
+            width: 100%;
+            aspect-ratio: 3/4;
+            background: #e2e8f0;
+            margin: 0 auto 1.5rem auto;
+            border: 4px solid white;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+        }
+        .photo-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Texty */
+        .cv-name { text-transform: uppercase; letter-spacing: 2px; line-height: 1.1; word-wrap: break-word; }
+        
+        .section-title {
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            color: #334155;
+        }
+
+        .sidebar-title {
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .contact-text {
+            word-break: break-all; /* Zalomí dlhý email */
+        }
+
+        /* Bewerbung Layout */
+        .letter-content { padding: 25mm 20mm 20mm 25mm; color: #1e293b; line-height: 1.5; font-size: 11pt; }
+        .sender-line { font-size: 8pt; color: #64748b; border-bottom: 1px solid #cbd5e1; padding-bottom: 2px; margin-bottom: 1rem; width: 85mm;}
+        
+        /* UI */
+        .tab-btn { padding: 12px 16px; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; flex: 1; text-align: center; white-space: nowrap; }
+        .tab-btn.active { border-bottom-color: #3b82f6; color: #3b82f6; background: #f8fafc; }
+        
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+        .input-group input, .input-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; /* 16px prevents iOS zoom */ }
+        
+        /* Mobilné UI úpravy */
+        #editor-panel {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            z-index: 40;
+        }
+        
+        /* Tlač */
+        @media print {
+            body { background: white; margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+            #preview-scaler { display: block; padding: 0; transform: none !important; width: auto; height: auto; }
+            .a4-page { box-shadow: none; margin: 0; transform: none !important; page-break-after: always; }
+            
+            body.print-cv #bewerbung-preview { display: none; }
+            body.print-letter #cv-preview { display: none; }
+        }
+  </style>
+ </head>
+ <body class="h-screen flex flex-col overflow-hidden">
+
+  <!-- 1. HLAVIČKA (Navigácia) -->
+  <div class="bg-white shadow-md z-50 no-print flex-none">
+    <div class="flex justify-between items-center p-3 border-b">
+        <h1 class="text-lg font-bold text-slate-700">🇩🇪 DE Kariéra</h1>
+        <div class="flex gap-2">
+            <button onclick="printDoc('cv')" class="bg-blue-600 active:bg-blue-700 text-white p-2 rounded shadow text-xs font-bold uppercase tracking-wider">
+                Tlač CV
+            </button>
+            <button onclick="printDoc('letter')" class="bg-slate-700 active:bg-slate-800 text-white p-2 rounded shadow text-xs font-bold uppercase tracking-wider">
+                Tlač List
+            </button>
+        </div>
+    </div>
+    <div class="flex border-b text-sm">
+        <div onclick="switchTab('cv')" id="tab-cv" class="tab-btn active">Životopis</div>
+        <div onclick="switchTab('letter')" id="tab-letter" class="tab-btn">List</div>
+        <div onclick="switchTab('editor')" id="tab-editor" class="tab-btn bg-yellow-50 text-yellow-700 border-yellow-200">✏️ Upraviť</div>
+    </div>
+  </div>
+
+  <!-- 2. HLAVNÝ OBSAH (SCROLLOVATEĽNÝ) -->
+  <div class="flex-1 overflow-y-auto bg-gray-200 relative" id="main-scroll-area">
+    
+    <!-- NÁHĽAD (PREVIEW) -->
+    <div id="preview-section" class="min-h-full">
+        <div id="preview-scaler">
+            
+            <!-- A4 CV -->
+            <div id="cv-preview" class="a4-page">
+                <!-- Ľavý Panel -->
+                <div class="cv-sidebar">
+                    <div class="photo-container">
+                        <img id="cv-photo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Crect width='24' height='24' fill='%23e2e8f0'/%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E">
+                    </div>
+
+                    <h3 class="sidebar-title">Kontakt</h3>
+                    <div class="text-sm space-y-3 font-light">
+                        <div class="contact-item">
+                            <span>📞</span> <span id="view-phone">+421 900 123 456</span>
+                        </div>
+                        <div class="contact-item">
+                            <span>✉️</span> <span id="view-email" class="contact-text">jan.novak@email.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <span>📍</span> <span id="view-address" class="contact-text">Bratislava, Slovensko</span>
+                        </div>
+                        <div class="contact-item">
+                            <span>📅</span> <span id="view-birth">01.01.1985</span>
+                        </div>
+                    </div>
+
+                    <h3 class="sidebar-title">Sprachen</h3>
+                    <div id="view-languages" class="space-y-2 text-sm"></div>
+
+                    <h3 class="sidebar-title">Kenntnisse</h3>
+                    <div id="view-skills" class="space-y-1 text-sm"></div>
+                </div>
+
+                <!-- Pravá Strana -->
+                <div class="cv-main">
+                    <header class="mb-8">
+                        <h1 class="cv-name text-4xl font-bold text-slate-800 mb-2" id="view-name">Ján Novák</h1>
+                        <p class="text-xl text-slate-500 uppercase tracking-widest" id="view-job">Manažér</p>
+                    </header>
+
+                    <div class="mb-6">
+                        <h2 class="section-title">Profil</h2>
+                        <p id="view-profile" class="text-sm text-slate-600 leading-relaxed text-justify">
+                            Profilový text...
+                        </p>
+                    </div>
+
+                    <div class="mb-6">
+                        <h2 class="section-title">Berufserfahrung</h2>
+                        <div id="view-experience" class="space-y-5"></div>
+                    </div>
+
+                    <div>
+                        <h2 class="section-title">Ausbildung</h2>
+                        <div id="view-education" class="space-y-4"></div>
+                    </div>
+                    
+                    <div class="mt-12 pt-8 flex justify-between text-sm text-slate-500">
+                        <div id="view-date-place">Bratislava, 04.12.2025</div>
+                        <div class="border-t border-slate-400 w-32 text-center pt-1 italic">Unterschrift</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- A4 List -->
+            <div id="bewerbung-preview" class="a4-page hidden">
+                <div class="letter-content relative h-full">
+                    <div class="absolute top-[45mm] left-[25mm]">
+                        <div class="sender-line" id="letter-sender-small">...</div>
+                        <div class="text-sm leading-snug mt-2">
+                            <div id="letter-company">Firma GmbH</div>
+                            <div id="letter-recipient">z.H. Herrn Müller</div>
+                            <div id="letter-street">Hauptstraße 1</div>
+                            <div id="letter-zip-city">10115 Berlin</div>
+                            <div id="letter-country">Deutschland</div>
+                        </div>
+                    </div>
+
+                    <div class="text-right text-sm mt-[20mm] mb-12 text-slate-600">
+                        <div id="letter-my-phone">...</div>
+                        <div id="letter-my-email">...</div>
+                        <div class="mt-4" id="letter-date">...</div>
+                    </div>
+
+                    <div class="mt-[60mm]">
+                        <h2 class="font-bold text-lg mb-6" id="letter-subject">Bewerbung...</h2>
+                        <div class="mb-4" id="letter-salutation">Sehr geehrte...</div>
+                        <div id="letter-body" class="text-justify text-sm space-y-4 whitespace-pre-line">Text...</div>
+                        <div class="mt-8 mb-8">
+                            <div>Mit freundlichen Grüßen</div>
+                            <div class="h-12"></div>
+                            <div id="letter-sign-name">...</div>
+                        </div>
+                        <div class="text-xs text-slate-500 border-t pt-2 mt-12">Anlagen: Lebenslauf, Zeugnisse</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDITOR PANEL (Zobrazí sa len po kliknutí na Upraviť) -->
+    <div id="editor-panel" class="hidden min-h-full bg-white p-4 pb-20">
+        <div class="max-w-2xl mx-auto space-y-6">
+             <!-- Foto -->
+             <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                <label class="block text-sm font-bold text-blue-800 mb-2">📸 Vaša Fotografia</label>
+                <input type="file" id="photo-input" accept="image/*" class="w-full text-sm text-slate-500"/>
+            </div>
+
+            <!-- Osobné údaje -->
+            <div class="space-y-3">
+                <h3 class="text-lg font-bold text-slate-900 pb-2 border-b">Osobné údaje</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="input-group"><label>Meno a Priezvisko</label><input type="text" id="in-name" value="Ján Novák"></div>
+                    <div class="input-group"><label>Pozícia (Nemecky)</label><input type="text" id="in-job" value="Verkaufsleiter"></div>
+                </div>
+                <div class="input-group"><label>Dátum narodenia</label><input type="text" id="in-birth" value="01.01.1985"></div>
+                <div class="input-group"><label>Telefón</label><input type="text" id="in-phone" value="+421 900 123 456"></div>
+                <div class="input-group"><label>Email</label><input type="text" id="in-email" value="jan.novak@email.com"></div>
+                <div class="input-group"><label>Adresa</label><input type="text" id="in-address" value="Hlavná 1, 811 01 Bratislava"></div>
+                <div class="input-group"><label>Profil</label><textarea id="in-profile" rows="3">Skúsený pracovník...</textarea></div>
+                <div class="input-group"><label>Miesto a Dátum</label><input type="text" id="in-date-place" value="Bratislava, 04.12.2025"></div>
+            </div>
+
+            <!-- Skúsenosti -->
+            <div class="space-y-3 mt-6 border-t pt-4">
+                <h3 class="text-lg font-bold text-slate-900 flex justify-between items-center">
+                    Pracovné skúsenosti
+                    <button onclick="addExp()" class="text-xs bg-green-100 text-green-700 px-3 py-2 rounded">+ Pridať</button>
+                </h3>
+                <div id="editor-exp-list" class="space-y-4"></div>
+            </div>
+
+            <!-- Vzdelanie -->
+            <div class="space-y-3 mt-6 border-t pt-4">
+                <h3 class="text-lg font-bold text-slate-900 flex justify-between items-center">
+                    Vzdelanie
+                    <button onclick="addEdu()" class="text-xs bg-green-100 text-green-700 px-3 py-2 rounded">+ Pridať</button>
+                </h3>
+                <div id="editor-edu-list" class="space-y-4"></div>
+            </div>
+
+            <!-- Zvyšok -->
+            <div class="space-y-3 mt-6 border-t pt-4">
+                <h3 class="text-lg font-bold text-slate-900">Zručnosti</h3>
+                <div class="input-group"><textarea id="in-skills" rows="4">Vodičský preukaz B&#10;Microsoft Office&#10;Flexibilita</textarea></div>
+                
+                <h3 class="text-lg font-bold text-slate-900">Jazyky</h3>
+                <div class="input-group"><textarea id="in-langs" rows="3">Slovenčina - Muttersprache&#10;Nemčina - B1</textarea></div>
+            </div>
+
+            <!-- List Editor -->
+            <div class="space-y-3 mt-6 border-t pt-4 bg-yellow-50 p-4 rounded">
+                <h3 class="text-lg font-bold text-yellow-900">Údaje pre Motivačný List</h3>
+                <div class="input-group"><label>Firma</label><input type="text" id="in-l-company" value="Musterfirma GmbH"></div>
+                <div class="input-group"><label>Adresát</label><input type="text" id="in-l-recipient" value="z.H. Herrn Müller"></div>
+                <div class="input-group"><label>Adresa Firmy</label><input type="text" id="in-l-street" value="Industriestraße 55"></div>
+                <div class="input-group"><label>Mesto Firmy</label><input type="text" id="in-l-city" value="80331 München"></div>
+                <div class="input-group"><label>Text listu</label><textarea id="in-l-body" rows="10">hiermit bewerbe ich mich...</textarea></div>
+            </div>
+            
+            <div class="h-10"></div>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    // --- ZOOM LOGIC (THE FIX) ---
+    function fitPage() {
+        const scaler = document.getElementById('preview-scaler');
+        const availableWidth = window.innerWidth;
+        const pageRealWidth = 794; // approx 210mm in pixels at 96dpi
+        
+        // Ak je obrazovka menšia ako A4 (plus nejaký padding), zmenši to
+        if (availableWidth < pageRealWidth + 20) {
+            const scale = (availableWidth - 20) / pageRealWidth;
+            document.querySelectorAll('.a4-page').forEach(page => {
+                page.style.transform = `scale(${scale})`;
+                page.style.marginBottom = `-${(1 - scale) * 100}%`; // Fix whitespace after scaling
+            });
+            // Update scaler height to fit zoomed content
+            //scaler.style.height = (1123 * scale) + 'px';
+        } else {
+            document.querySelectorAll('.a4-page').forEach(page => {
+                page.style.transform = 'none';
+                page.style.marginBottom = '0';
+            });
+            scaler.style.height = 'auto';
+        }
+    }
+    
+    window.addEventListener('resize', fitPage);
+    // Call on load
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(fitPage, 100); // Small delay to ensure render
+    });
+
+    // --- TABS LOGIC ---
+    let currentView = 'cv';
+    
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+
+        const editorPanel = document.getElementById('editor-panel');
+        const previewSection = document.getElementById('preview-section');
+        const cvPreview = document.getElementById('cv-preview');
+        const letterPreview = document.getElementById('bewerbung-preview');
+
+        if (tab === 'editor') {
+            editorPanel.classList.remove('hidden');
+            previewSection.classList.add('hidden');
+        } else {
+            editorPanel.classList.add('hidden');
+            previewSection.classList.remove('hidden');
+            
+            if (tab === 'cv') {
+                cvPreview.classList.remove('hidden');
+                letterPreview.classList.add('hidden');
+                currentView = 'cv';
+            } else if (tab === 'letter') {
+                cvPreview.classList.add('hidden');
+                letterPreview.classList.remove('hidden');
+                currentView = 'letter';
+            }
+            // Recalculate zoom when showing preview again
+            setTimeout(fitPage, 10);
+        }
+    }
+
+    // --- DATA ---
+    let experiences = [
+        { company: "Firma s.r.o.", position: "Skladník", period: "01/2020 - 12/2023", description: "Príjem a výdaj tovaru." }
+    ];
+    let education = [
+        { school: "Stredná Škola", degree: "Maturita", period: "2010 - 2014" }
+    ];
+
+    // --- RENDER & EDITOR LOGIC ---
+    function renderAll() {
+        // CV Base
+        document.getElementById('view-name').innerText = document.getElementById('in-name').value;
+        document.getElementById('view-job').innerText = document.getElementById('in-job').value;
+        document.getElementById('view-phone').innerText = document.getElementById('in-phone').value;
+        document.getElementById('view-email').innerText = document.getElementById('in-email').value;
+        document.getElementById('view-address').innerText = document.getElementById('in-address').value;
+        document.getElementById('view-birth').innerText = document.getElementById('in-birth').value;
+        document.getElementById('view-profile').innerText = document.getElementById('in-profile').value;
+        document.getElementById('view-date-place').innerText = document.getElementById('in-date-place').value;
+
+        // Skills & Langs
+        document.getElementById('view-skills').innerHTML = document.getElementById('in-skills').value.split('\n').filter(s=>s.trim()).map(s => `<div>• ${s}</div>`).join('');
+        document.getElementById('view-languages').innerHTML = document.getElementById('in-langs').value.split('\n').filter(s=>s.trim()).map(s => {
+            const parts = s.split('-'); return `<div><b>${parts[0]}</b>${parts[1] ? ': '+parts[1] : ''}</div>`;
+        }).join('');
+
+        // Letter
+        const name = document.getElementById('in-name').value;
+        const addr = document.getElementById('in-address').value;
+        document.getElementById('letter-sender-small').innerText = `${name} • ${addr}`;
+        document.getElementById('letter-company').innerText = document.getElementById('in-l-company').value;
+        document.getElementById('letter-recipient').innerText = document.getElementById('in-l-recipient').value;
+        document.getElementById('letter-street').innerText = document.getElementById('in-l-street').value;
+        document.getElementById('letter-zip-city').innerText = document.getElementById('in-l-city').value;
+        document.getElementById('letter-my-phone').innerText = document.getElementById('in-phone').value;
+        document.getElementById('letter-my-email').innerText = document.getElementById('in-email').value;
+        document.getElementById('letter-date').innerText = document.getElementById('in-date-place').value;
+        document.getElementById('letter-body').innerText = document.getElementById('in-l-body').value;
+        document.getElementById('letter-sign-name').innerText = name;
+
+        // Lists
+        const expHTML = experiences.map(item => `
+            <div class="grid grid-cols-[1fr_3fr] gap-4 border-l-2 border-slate-200 pl-4 relative">
+                <div class="w-2 h-2 bg-slate-400 rounded-full absolute -left-[5px] top-2"></div>
+                <div class="text-sm font-bold text-slate-500 pt-1">${item.period}</div>
+                <div>
+                    <div class="font-bold text-lg text-slate-800 leading-tight">${item.position}</div>
+                    <div class="text-blue-600 font-semibold text-sm mb-1">${item.company}</div>
+                    <div class="text-sm text-slate-600">${item.description}</div>
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('view-experience').innerHTML = expHTML;
+
+        const eduHTML = education.map(item => `
+            <div class="grid grid-cols-[1fr_3fr] gap-4 border-l-2 border-slate-200 pl-4 relative">
+                <div class="w-2 h-2 bg-slate-400 rounded-full absolute -left-[5px] top-2"></div>
+                <div class="text-sm font-bold text-slate-500 pt-1">${item.period}</div>
+                <div>
+                    <div class="font-bold text-lg text-slate-800 leading-tight">${item.degree}</div>
+                    <div class="text-sm text-slate-600">${item.school}</div>
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('view-education').innerHTML = eduHTML;
+    }
+
+    function renderEditorLists() {
+        const expCont = document.getElementById('editor-exp-list');
+        expCont.innerHTML = experiences.map((exp, i) => `
+            <div class="bg-slate-50 p-2 rounded border relative">
+                <button onclick="experiences.splice(${i},1); renderEditorLists(); renderAll()" class="absolute top-1 right-1 text-red-500 font-bold px-2">×</button>
+                <input class="w-full mb-1 border p-1" value="${exp.position}" oninput="experiences[${i}].position=this.value; renderAll()" placeholder="Pozícia">
+                <input class="w-full mb-1 border p-1" value="${exp.company}" oninput="experiences[${i}].company=this.value; renderAll()" placeholder="Firma">
+                <input class="w-full mb-1 border p-1" value="${exp.period}" oninput="experiences[${i}].period=this.value; renderAll()" placeholder="Dátum">
+                <textarea class="w-full border p-1" oninput="experiences[${i}].description=this.value; renderAll()" rows="2">${exp.description}</textarea>
+            </div>
+        `).join('');
+
+        const eduCont = document.getElementById('editor-edu-list');
+        eduCont.innerHTML = education.map((edu, i) => `
+            <div class="bg-slate-50 p-2 rounded border relative">
+                <button onclick="education.splice(${i},1); renderEditorLists(); renderAll()" class="absolute top-1 right-1 text-red-500 font-bold px-2">×</button>
+                <input class="w-full mb-1 border p-1" value="${edu.degree}" oninput="education[${i}].degree=this.value; renderAll()" placeholder="Titul">
+                <input class="w-full mb-1 border p-1" value="${edu.school}" oninput="education[${i}].school=this.value; renderAll()" placeholder="Škola">
+                <input class="w-full border p-1" value="${edu.period}" oninput="education[${i}].period=this.value; renderAll()" placeholder="Dátum">
+            </div>
+        `).join('');
+    }
+
+    function addExp() { experiences.push({company:"", position:"", period:"", description:""}); renderEditorLists(); renderAll(); }
+    function addEdu() { education.push({school:"", degree:"", period:""}); renderEditorLists(); renderAll(); }
+
+    document.getElementById('photo-input').addEventListener('change', function(e) {
+        if (e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => document.getElementById('cv-photo').src = e.target.result;
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    document.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', renderAll));
+
+    function printDoc(type) {
+        document.body.className = type === 'cv' ? 'print-cv' : 'print-letter';
+        
+        // Force show the correct preview for printing
+        const editorPanel = document.getElementById('editor-panel');
+        const previewSection = document.getElementById('preview-section');
+        const cvPreview = document.getElementById('cv-preview');
+        const letterPreview = document.getElementById('bewerbung-preview');
+
+        editorPanel.classList.add('hidden');
+        previewSection.classList.remove('hidden');
+
+        if(type === 'cv') {
+            cvPreview.classList.remove('hidden');
+            letterPreview.classList.add('hidden');
+        } else {
+            cvPreview.classList.add('hidden');
+            letterPreview.classList.remove('hidden');
+        }
+
+        // Reset scale for print
+        document.querySelectorAll('.a4-page').forEach(page => page.style.transform = 'none');
+
+        window.print();
+        
+        // Restore zoom after print
+        setTimeout(fitPage, 500);
+        
+        // Restore UI state
+        document.body.className = 'h-screen flex flex-col overflow-hidden';
+    }
+
+    renderEditorLists();
+    renderAll();
+    setTimeout(fitPage, 100);
+  </script>
+ </body>
+</html>
+
