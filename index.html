@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bewerbung - Ivan Konopka</title>
+
+<!-- Apple Web App Settings -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ivan CV">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+        --navy: #0f172a;
+        --accent: #2563eb;
+    }
+
+    body { 
+        font-family: 'Inter', sans-serif; 
+        background: #f1f5f9; 
+        margin: 0; padding: 0; 
+        color: #1e293b;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    #preview-scaler {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 20px 0;
+        overflow-x: auto;
+    }
+
+    .a4-page {
+        width: 210mm;
+        min-height: 297mm;
+        height: auto;
+        background: white;
+        box-shadow: 0 20px 25px rgba(0,0,0,0.1);
+        position: relative;
+        flex-shrink: 0;
+        transform-origin: top center;
+    }
+
+    .cv-sidebar {
+        background-color: var(--navy);
+        color: #f1f5f9;
+        width: 70mm;
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        padding: 30px 20px;
+        box-sizing: border-box;
+    }
+
+    .cv-main {
+        margin-left: 70mm;
+        width: 140mm;
+        padding: 45px 35px;
+        box-sizing: border-box;
+    }
+
+    .photo-container {
+        width: 100%;
+        aspect-ratio: 1/1.2;
+        background: #1e293b;
+        margin-bottom: 2rem;
+        border: 4px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .photo-container img { width: 100%; height: 100%; object-fit: cover; }
+
+    .section-title {
+        text-transform: uppercase;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        border-bottom: 3px solid var(--navy);
+        padding-bottom: 5px;
+        margin-bottom: 20px;
+        margin-top: 35px;
+        font-size: 0.85rem;
+    }
+
+    .sidebar-title {
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        border-bottom: 1px solid rgba(255,255,255,0.15);
+        padding-bottom: 6px;
+        margin-bottom: 15px;
+        margin-top: 30px;
+        font-size: 0.75rem;
+        color: #cbd5e1;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-left: 20px;
+        border-left: 2px solid #e2e8f0;
+        padding-bottom: 20px;
+    }
+    .timeline-dot {
+        width: 10px; height: 10px;
+        background: var(--accent);
+        border-radius: 50%;
+        position: absolute;
+        left: -6px; top: 4px;
+        box-shadow: 0 0 0 3px white;
+    }
+
+    .letter-content { padding: 30mm 25mm; line-height: 1.6; font-size: 11pt; }
+
+    .tab-btn { padding: 12px 15px; font-weight: 600; cursor: pointer; flex: 1; text-align: center; border-bottom: 3px solid transparent; color: #64748b; }
+    .tab-btn.active { border-bottom-color: var(--accent); color: var(--accent); background: white; }
+    
+    @media print {
+        .no-print { display: none !important; }
+        #preview-scaler { display: block; padding: 0; transform: none !important; }
+        .a4-page { box-shadow: none; margin: 0; transform: none !important; page-break-after: always; }
+        body.print-cv #letter-preview { display: none !important; }
+        body.print-letter #cv-preview { display: none !important; }
+    }
+</style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+<nav class="bg-white shadow-sm z-50 no-print flex-none">
+  <div class="max-w-7xl mx-auto flex justify-between items-center p-3 border-b">
+      <h1 class="text-md font-bold text-slate-700">Kariérny Portál - Ivan Konopka</h1>
+      <button onclick="printDoc()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow-sm text-sm font-bold active:scale-95 transition-all">
+          Exportovať PDF
+      </button>
+  </div>
+  <div class="flex max-w-7xl mx-auto text-sm">
+      <div onclick="switchTab('cv')" id="tab-cv" class="tab-btn active">Lebenslauf</div>
+      <div onclick="switchTab('letter')" id="tab-letter" class="tab-btn">Bewerbung</div>
+      <div onclick="switchTab('editor')" id="tab-editor" class="tab-btn bg-blue-50 text-blue-700">✏️ Fotka / Úprava</div>
+  </div>
+</nav>
+
+<div class="flex-1 overflow-y-auto bg-slate-100 relative" id="main-scroll-area">
+  <div id="preview-section" class="min-h-full">
+      <div id="preview-scaler">
+          
+          <!-- LEBENSLAUF -->
+          <div id="cv-preview" class="a4-page">
+              <div class="cv-sidebar">
+                  <div class="photo-container shadow-inner">
+                      <img id="cv-photo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23334155'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E">
+                  </div>
+                  <h3 class="sidebar-title">Kontakt</h3>
+                  <div class="text-[11px] space-y-4 font-light">
+                      <div>📞 <span id="v-phone"></span></div>
+                      <div>✉️ <span id="v-email" class="break-all"></span></div>
+                      <div>📍 <span id="v-address"></span></div>
+                      <div>📅 <span id="v-birth"></span></div>
+                  </div>
+                  <h3 class="sidebar-title">Sprachen</h3>
+                  <div id="v-langs" class="text-[11px] space-y-2"></div>
+                  <h3 class="sidebar-title">Expertise</h3>
+                  <div id="v-skills" class="text-[11px] space-y-2"></div>
+              </div>
+
+              <div class="cv-main">
+                  <header class="mb-10">
+                      <h1 class="text-4xl font-extrabold tracking-tight mb-1 text-slate-900 uppercase" id="v-name"></h1>
+                      <p class="text-xl text-blue-700 font-bold uppercase tracking-widest" id="v-job"></p>
+                  </header>
+                  <section>
+                      <h2 class="section-title">Kurzprofil</h2>
+                      <p id="v-profile" class="text-sm text-slate-600 text-justify leading-relaxed italic"></p>
+                  </section>
+                  <section>
+                      <h2 class="section-title">Berufserfahrung</h2>
+                      <div id="v-exp" class="mt-4"></div>
+                  </section>
+                  <section>
+                      <h2 class="section-title">Ausbildung</h2>
+                      <div id="v-edu" class="mt-4"></div>
+                  </section>
+              </div>
+          </div>
+
+          <!-- BEWERBUNG -->
+          <div id="letter-preview" class="a4-page hidden">
+              <div class="letter-content">
+                  <div class="mb-14 text-[10px] text-slate-400 border-b pb-1" id="v-l-sender-line"></div>
+                  <div class="mb-16">
+                      <div id="v-l-company" class="font-bold text-lg text-slate-800"></div>
+                      <div id="v-l-recipient" class="text-slate-600"></div>
+                      <div id="v-l-address" class="text-slate-600"></div>
+                  </div>
+                  <div class="text-right text-sm mb-10 font-medium" id="v-l-date"></div>
+                  <h2 class="font-extrabold text-xl mb-10 text-slate-900 border-l-4 border-blue-600 pl-4" id="v-l-subject"></h2>
+                  <div class="mb-4 font-bold text-slate-800">Sehr geehrte Damen und Herren,</div>
+                  <div id="v-l-body" class="text-justify whitespace-pre-line text-[10.5pt] mb-14 leading-relaxed text-slate-700"></div>
+                  <div class="mt-12">
+                      <div class="text-slate-800 font-medium">Mit freundlichen Grüßen,</div>
+                      <div class="h-14"></div>
+                      <div id="v-l-name" class="font-extrabold text-lg"></div>
+                      <div class="text-[10px] text-slate-400 mt-2 uppercase tracking-widest">Anlagen: Lebenslauf, Zeugnisse</div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div id="editor-panel" class="hidden p-6 bg-white max-w-4xl mx-auto shadow-xl my-10 rounded-xl pb-24">
+      <div class="bg-slate-900 p-4 rounded-lg text-white mb-6">
+          <h2 class="font-bold">Finálne úpravy (Gramaticky overené)</h2>
+          <p class="text-xs opacity-70">Nahrajte fotku a skontrolujte svoje dáta. Jazyková úroveň a Abitur sú už v nemčine nastavené.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 border rounded-lg bg-slate-50">
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Vložiť fotografiu</label>
+              <input type="file" id="photo-in" accept="image/*" class="text-xs w-full">
+          </div>
+          <div class="space-y-4">
+            <input type="text" id="in-name" value="Ivan Konopka" class="w-full border p-2 rounded text-sm" placeholder="Meno">
+            <input type="text" id="in-phone" value="+49 151 43691993" class="w-full border p-2 rounded text-sm" placeholder="Mobil">
+          </div>
+      </div>
+      <div class="h-10"></div>
+  </div>
+</div>
+
+<script>
+    const experiences = [
+        { 
+            c: "Deltec Automotive GmbH & Co. KG", 
+            p: "Mitarbeiter in der Logistik / Material-Runner", 
+            d: "05/2022 — Heute", 
+            desc: "Verantwortlich für die termingerechte Materialbereitstellung an Fertigungslinien. Sicherer Umgang mit Frontstapler, Schubmaststapler, Ameisen und Elektro-Niederhubwagen. Gelegentliche Koordination eines kleinen Teams (2-4 Personen) zur Absicherung der Prozessabläufe." 
+        },
+        { 
+            c: "Genesungsphase & Rekonvaleszenz", 
+            p: "Gesundheitliche Regeneration", 
+            d: "04/2021 — 04/2022", 
+            desc: "Phase der Genesung nach einer Knieoperation sowie berufliche Neuorientierung während der Pandemie." 
+        },
+        { 
+            c: "Aktiv Personal Service GmbH (Zeitarbeit)", 
+            p: "Einsatz bei: HBPO Germany GmbH", 
+            d: "01/2021 — 03/2021", 
+            desc: "Tätigkeit in der Montage von Frontmasken für die Automobilproduktion." 
+        },
+        { 
+            c: "Aktiv Personal Service GmbH (Zeitarbeit)", 
+            p: "Einsatz bei: Preymesser GmbH", 
+            d: "2018 — 2020", 
+            desc: "Mitarbeiter in der Warensteuerung: Bestandskontrolle, Einteilung der Warenströme in Boxen sowie Erstellung von Transportdokumenten für LKW-Logistik." 
+        },
+        { 
+            c: "Aktiv Personal Service GmbH (Zeitarbeit)", 
+            p: "Einsatz bei: Syncreon", 
+            d: "2017 (9 Monate)", 
+            desc: "Mitarbeiter in der Exportverpackung: Fachgerechte Vorbereitung und Sicherung von Industriegütern am Fließband." 
+        }
+    ];
+
+    function render() {
+        const name = document.getElementById('in-name').value;
+        const phone = document.getElementById('in-phone').value;
+        const address = "Josef Heigl Straße 1, 93437 Furth im Wald";
+        const email = "ivan.konopka@web.de";
+        const birth = "18.07.1981";
+        const date = "Furth im Wald, 12.01.2026";
+
+        document.getElementById('v-name').innerText = name;
+        document.getElementById('v-job').innerText = "Logistikmitarbeiter / Material-Runner";
+        document.getElementById('v-phone').innerText = phone;
+        document.getElementById('v-email').innerText = email;
+        document.getElementById('v-address').innerText = address;
+        document.getElementById('v-birth').innerText = birth;
+        document.getElementById('v-profile').innerText = "Zuverlässiger Logistikmitarbeiter mit einer fundierten Ausbildung zum Autoelektroniker (Abitur). Langjährige Berufserfahrung in der deutschen Industrie, spezialisiert auf Materialversorgung sowie den sicheren Umgang mit diversen Flurförderzeugen (Schubmast, Ameise, Langgabeln).";
+        
+        document.getElementById('v-langs').innerHTML = "<div>Slowakisch — <b>Muttersprache</b></div><div>Deutsch — <b>A2/B1 (Grundkenntnisse)</b></div>";
+        document.getElementById('v-skills').innerHTML = "<div>• Frontstapler & Schubmaststapler</div><div>• Langgabeln & Ameisen</div><div>• Innerbetriebliche Logistik</div><div>• Handlöten & Scannersysteme</div>";
+
+        document.getElementById('v-l-sender-line').innerText = `${name} • ${address}`;
+        document.getElementById('v-l-company').innerText = "Ensinger GmbH";
+        document.getElementById('v-l-recipient').innerText = "Personalabteilung";
+        document.getElementById('v-l-address').innerText = "Wilfried-Ensinger-Straße 1, 93413 Cham";
+        document.getElementById('v-l-date').innerText = date;
+        document.getElementById('v-l-subject').innerText = "Bewerbung als Logistikmitarbeiter / Material-Runner";
+        
+        document.getElementById('v-l-body').innerText = `hiermit bewerbe ich mich um eine Stelle als Logistikmitarbeiter in Ihrem Unternehmen.
+Derzeit bin ich bei der Firma Deltec Automotive in Furth im Wald tätig, wo ich für die Materialversorgung der Fertigungslinien verantwortlich bin. Ich verfüge über umfassende Erfahrung im Umgang mit verschiedenen Flurförderzeugen, einschließlich Front- und Schubmaststaplern, Langgabeln sowie elektrischen Niederhubwagen (Ameisen).
+
+Zusätzlich konnte ich praktische Erfahrungen in der Koordination kleiner Teams (2-4 Personen) sammeln, was mir dabei half, die Abläufe innerhalb einer Schicht besser zu verstehen.
+
+Ich bin ein zuverlässiger Mitarbeiter, arbeite gerne im Team und verfüge o hohe Lernbereitschaft. Über die Einladung zu einem persönlichen Gespräch freue ich mich sehr.`;
+
+        document.getElementById('v-l-name').innerText = name;
+
+        document.getElementById('v-exp').innerHTML = experiences.map(e => `
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="text-[10px] font-extrabold text-blue-600 uppercase tracking-tighter">${e.d}</div>
+                <div class="font-bold text-[13px] leading-tight text-slate-800">${e.p}</div>
+                <div class="text-blue-800 text-[11px] font-bold uppercase mt-0.5">${e.c}</div>
+                <div class="text-[11px] text-slate-500 mt-2 leading-relaxed font-medium italic">${e.desc}</div>
+            </div>
+        `).join('');
+
+        document.getElementById('v-edu').innerHTML = `
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="text-[10px] font-extrabold text-slate-400 uppercase tracking-tighter">1995 — 1999</div>
+                <div class="font-bold text-[13px] leading-tight text-slate-800 uppercase">Elektrotechnische Fachschule mit Abitur</div>
+                <div class="text-xs text-slate-500 font-semibold mt-1">Fachrichtung: Autoelektronik (Slowakei)</div>
+            </div>
+        `;
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-'+tab).classList.add('active');
+        document.getElementById('editor-panel').classList.toggle('hidden', tab !== 'editor');
+        document.getElementById('preview-section').classList.toggle('hidden', tab === 'editor');
+        document.getElementById('cv-preview').classList.toggle('hidden', tab !== 'cv');
+        document.getElementById('letter-preview').classList.toggle('hidden', tab !== 'letter');
+        if(tab !== 'editor') setTimeout(fitPage, 50);
+    }
+
+    function fitPage() {
+        const availableWidth = window.innerWidth;
+        const pageRealWidth = 794; 
+        if (availableWidth < pageRealWidth + 40) {
+            const scale = (availableWidth - 40) / pageRealWidth;
+            document.querySelectorAll('.a4-page').forEach(page => {
+                page.style.transform = `scale(${scale})`;
+                page.style.marginBottom = `-${(1 - scale) * 297 * 3.78}px`; 
+            });
+        } else {
+            document.querySelectorAll('.a4-page').forEach(page => {
+                page.style.transform = 'none';
+                page.style.marginBottom = '20px';
+            });
+        }
+    }
+
+    function printDoc() {
+        const tab = document.querySelector('.tab-btn.active').id;
+        document.body.className = (tab === 'tab-cv') ? 'print-cv' : 'print-letter';
+        window.print();
+        setTimeout(() => { document.body.className = 'h-screen flex flex-col overflow-hidden'; fitPage(); }, 500);
+    }
+
+    document.getElementById('photo-in').addEventListener('change', function(e) {
+        if (e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => document.getElementById('cv-photo').src = e.target.result;
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    window.addEventListener('resize', fitPage);
+    document.getElementById('in-name').addEventListener('input', render);
+    document.getElementById('in-phone').addEventListener('input', render);
+    render();
+    setTimeout(fitPage, 200);
+</script>
+</body>
+</html>
+
+
